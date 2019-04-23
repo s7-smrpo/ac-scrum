@@ -1,0 +1,204 @@
+extends layout
+
+
+block content
+
+
+    link(href='/stylesheets/vendor/select2.min.css', rel='stylesheet')
+    link(href='/stylesheets/vendor/select2-bootstrap.min.css', rel='stylesheet')
+
+
+    main.container(role="main")
+        .container.theme-showcase
+            .page-header
+                h3 Sprint view - sprint #{currentSprint.id}
+                .container
+                    nav.navbar.navbar-expand-lg.navbar-light.bg-light
+                        ul.navbar-nav.mr-auto
+                            li.nav-item
+                                a.nav-link(href='/sprints')
+                                    i.fas.fa-chevron-left
+                                    |   Sprints
+                                    if !isUser || project.scrum_master == uid
+                                        li.nav-item
+                                            a.nav-link(href='/sprints/' + currentSprint.id + '/edit') Edit Sprint
+
+                hr
+            div.main.container
+                .row
+                    if errorMessages !== 0
+                        .col-md-12.col-md-offset-0.margin-top20
+                            .alert.alert-danger(role="alert")
+                                h4.alert-heading #{errorMessages}
+                                p Something went wrong. Please check if your form is correct - otherwise try later or contact application administrator.
+
+                    if success !== 0
+                        .col-md-12.col-md-offset-0.margin-top20
+                            .alert.alert-success(role="alert")
+                                h4.alert-heading Success.
+                                p New sprint has been successfully added.
+
+                    if successUpdate !== 0
+                        .col-md-12.col-md-offset-0.margin-top20
+                            .alert.alert-success(role="alert")
+                                h4.alert-heading Success.
+                                p Sprint has been successfully updated.
+
+                    div.col-md-9.col-md-offset-0.margin-center.margin-top20
+                        div.panel-body
+                            div
+                                form.well.form-horizontal(method='POST' action='/sprints/'+ currentSprint.id + '/edit/')#sprint_form
+                                    div.panel-body
+                                        div.col-md-12.col-md-offset-0
+                                            div.form-group
+                                                label Date range
+                                                input.form-control(type='text' name="selected_date" placeholder="Start date to end date" readonly='' value=selected_sprint_date)
+                                            div.form-group
+                                                label Sprint velocity
+                                                input.form-control(name="velocity" placeholder='Sprint velocity' readonly='' value=currentSprint.velocity)
+                                            div.form-group
+                                                label Sprint project
+                                                input.form-control(type='text' name="sprint_project" placeholder='Sprint project' value=project.name readonly='')
+                                            div.form-group
+                                                if(toEditSprint)
+                                                    label Sprint stories
+                                                    select#sprint_stories.form-control(name='stories', multiple='multiple' placeholder='Sprint stories' readonly='')
+                                                        each story in stories
+                                                            option(value=story.id  selected=(story.sprint_id===currentSprint.id) readonly='') #{story.name}
+
+
+                if tasks && !success && !successUpdate && !errorMessages
+
+                    br
+                    h3 Sprint backlog
+
+                    hr
+                    h4(id="sprintsDeck") Active tasks in this sprint
+                    br
+
+                    div.col-md-12
+                        table.tableColors.pointers.table.table-bordered.table-hover(summary="List of all Tasks")
+                            thead.thead-dark
+                                tr
+                                    //th User ID
+                                    th(scope="col") Task ID
+                                    th(scope="col") Task name
+                                    th(scope="col") Assignee
+                                    th(scope="col") Task size [h]
+                                    th(scope="col") Story name
+                                    th(scope="col") Status
+                            tbody
+                                 each task in tasks
+                                    tr.clickable-row(data-href='/projects/' + task.project_id + '/view?story' + task.story_id)
+                                        td #{task.id}
+                                        td #{task.name}
+                                        if task.assigneeTask
+                                            td #{task.assigneeTask}
+                                        if !task.assigneeTask
+                                            td /
+                                        - var time = Math.round(task.time * 6 * 2) / 2
+                                        td #{time}
+                                        td #{task.story.name}
+                                        td TODO
+
+
+                if stories && !success && !successUpdate && !errorMessages
+
+                    hr
+                    h4(id="storiesDeck") Active stories in this sprint
+                    br
+
+                    div.col-md-12
+                        table.tableColors2.pointers.table.table-bordered.table-hover(summary="List of all Stories")
+                            thead.thead-dark
+                                tr
+                                    //th User ID
+                                    th(scope="col") Story ID
+                                    th(scope="col") Story name
+                                    th(scope="col") Importance
+                                    th(scope="col") Business value
+                                    th(scope="col") Estimated time
+                                    th(scope="col") Status
+                            tbody
+                                each story in stories
+                                    tr.clickable-row(data-href='/projects/' + story.project_id + '/view?story' + story.id)
+                                        td #{story.id}
+                                        td #{story.name}
+                                        td #{story.importance}
+                                        td #{story.businessValue}
+                                        td #{story.estimatedTime}
+                                        if story.in_progress
+                                            td in progress
+                                        if story.is_done
+                                            td done
+                                        if !story.is_done && !story.in_progress
+                                            td ready to start work
+
+
+    script.
+        window.addEventListener('load', function () {
+            $('#sprint_stories').select2({disabled:true});
+
+            $(document).ready(function ($) {
+                $(".clickable-row").click(function () {
+                    window.location = $(this).data("href");
+                });
+
+                var rowsStorage = 1;
+                var rowsColors = [];
+                var rowsTmp = [];
+                var rowsTmpStorage = [];
+
+                if ($('.tableColors').length > 0) {
+                    $('.tableColors').DataTable({
+                        stateSave: false,
+                        responsive: true,
+                        "order": [[ 4, "asc" ]],
+                        "createdRow": function (row, data, dataIndex) {
+
+                            if (!rowsTmp.includes(data[4])) {
+                                rowsTmp.push(data[4]);
+                                if (rowsStorage === 1) {
+                                    rowsColors.push('dt-white');
+                                    $(row).addClass('dt-white');
+                                    rowsTmpStorage.push(1);
+                                    rowsStorage = 0;
+                                } else {
+                                    rowsColors.push('dt-blue');
+                                    $(row).addClass('dt-blue');
+                                    rowsTmpStorage.push(0);
+                                    rowsStorage = 1;
+                                }
+                            }
+                            else {
+                                var index = rowsTmp.findIndex(
+                                    function contains(tmp) {
+                                        return tmp === data[4];
+                                    }
+                                );
+                                rowsTmp.push(data[4]);
+                                var barva = rowsTmpStorage[index];
+
+                                if (barva === 1) {
+                                    rowsColors.push('dt-white');
+                                    $(row).addClass('dt-white');
+                                    rowsTmpStorage.push(1);
+                                }
+                                else {
+                                    rowsColors.push('dt-blue');
+                                    $(row).addClass('dt-blue');
+                                    rowsTmpStorage.push(0);
+                                }
+                            }
+                        }
+                    });
+                }
+
+                if ($('.tableColors2').length > 0) {
+                    $('.tableColors2').DataTable({
+                        stateSave: false,
+                        responsive: true
+                    });
+                }
+            });
+        })

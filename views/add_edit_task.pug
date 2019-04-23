@@ -1,0 +1,182 @@
+extends layout
+
+block content
+    link(href='/stylesheets/vendor/select2.min.css', rel='stylesheet')
+    link(href='/stylesheets/vendor/select2-bootstrap.min.css', rel='stylesheet')
+
+    main.container(role="main")
+        .container.theme-showcase
+            .page-header
+                if toEditTask
+                    h3 Edit Task
+                if !toEditTask
+                    h3 Create new Task
+                .container
+                    nav.navbar.navbar-expand-lg.navbar-light.bg-light
+                        ul.navbar-nav.mr-auto
+                            li.nav-item
+                                a.nav-link(href='/projects/' + projectId + '/view')
+                                    i.fas.fa-chevron-left
+                                    |   Back to Project
+                        ul.navbar-nav
+                            li.nav-item
+                                if toEditTask
+                                    a.btn.btn-warning(href='/tasks/' + toEditTask.id + '/delete' ) Delete
+                hr
+            div.main.container
+                .row
+                    if errorMessages !== 0
+                        .col-md-12.col-md-offset-0.margin-top20
+                            .alert.alert-danger(role="alert")
+                                h4.alert-heading #{errorMessages}
+                                p Something went wrong. Please check if your form is correct - otherwise try later or contact application administrator.
+
+                    if success !== 0
+                        .col-md-12.col-md-offset-0.margin-top20
+                            .alert.alert-success(role="alert")
+                                h4.alert-heading Success.
+                                p #{success}.
+
+                    div.col-md-9.col-md-offset-0.margin-center.margin-top20
+                        div.panel-body
+                            div
+                                form.well.form-horizontal(method='POST' action=(toEditTask ? '/tasks/'+ toEditTask.id + '/edit/' : '/tasks/create/' + projectId + '/' + storyId))#task_form
+                                    div.panel-body
+                                        div.col-md-12.col-md-offset-0
+                                            div.form-group
+                                                label(for='task_name') Task name:
+                                                input#task_name.form-control(type='text' placeholder='Enter task name' name='name' value=(toEditTask? toEditTask.name : '') )
+                                            div.form-group
+                                                label(for='task_description') Task description:
+                                                input#task_description.form-control(type='text' placeholder='Enter task description' name='description' value=(toEditTask? toEditTask.description : '') )
+                                            div.form-group
+                                                label(for='task_time') Task size [h]
+                                                input#task_time.form-control(type='number' step="0.5" placeholder='Task time' name="time" value=(toEditTask ? Math.round(toEditTask.time * 6 * 2) / 2 : ''))
+                                            div.form-group
+                                                label(for='assignee') Task assignee
+                                                select#assignee.form-control(name="assignee", placeholder='Assignee')
+                                                    option
+                                                    each user in projectUsers
+                                                        if(user.id != project.product_owner)
+                                                            option(label=user.name selected=(toEditTask && toEditTask.assignee === user.id)) #{user.id}
+                                            if !toEditTask
+                                                button.btn.btn-primary.center-block.margin-top20#createBtn(type='submit') Create
+                                            if toEditTask
+                                                button.btn.btn-primary.center-block.margin-top20#updateBtn(type='submit') Update
+
+    input#aval_time(style='display:none;', value=(timeForNewTask ? timeForNewTask : '' ))
+    input#to_edit(style='display:none;', value=(toEditTask ? toEditTask.time : ''))
+
+
+    script.
+        window.addEventListener('load', function () {
+
+            $('#task_form').bootstrapValidator({
+                // To use feedback icons, ensure that you use Bootstrap v3.1.0 or later
+                framework: 'bootstrap',
+                feedbackIcons: {
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    time: {
+                        validators: {
+                            between: {
+                                min: 0.5,
+                                max: 108,
+                                message: 'Value of task time can be between 0.5 and 108 hours',
+                            }
+                        },
+                        notEmpty: {
+                            message: 'Please enter task time.'
+                        }
+                    }
+                },
+            });
+
+            // var task_time = $('#aval_time').val();
+            // var edit_task = $('#to_edit').val();
+            //
+            // console.log("aval_time: " + task_time);
+            // console.log("edit_task: " + edit_task);
+
+            // if(task_time.length<1 && edit_task.length < 1){
+            //     $('#task_form').bootstrapValidator({
+            //         // To use feedback icons, ensure that you use Bootstrap v3.1.0 or later
+            //         framework: 'bootstrap',
+            //         feedbackIcons: {
+            //             valid: 'glyphicon glyphicon-ok',
+            //             invalid: 'glyphicon glyphicon-remove',
+            //             validating: 'glyphicon glyphicon-refresh'
+            //         },
+            //         fields: {
+            //             time: {
+            //                 validators: {
+            //                     between: {
+            //                         //Ugly af, fix asap
+            //                         //TODO: change this
+            //                         min: -99999,
+            //                         max: -99999,
+            //                         message: 'There is no more time for tasks in this story ',
+            //                     }
+            //                 },
+            //                 notEmpty: {
+            //                     message: 'Please enter task time.'
+            //                 }
+            //             }
+            //         },
+            //     });
+            //
+            // }else if(task_time.length<1 && edit_task.length > 0) {
+            //     $('#task_form').bootstrapValidator({
+            //         // To use feedback icons, ensure that you use Bootstrap v3.1.0 or later
+            //         framework: 'bootstrap',
+            //         feedbackIcons: {
+            //             valid: 'glyphicon glyphicon-ok',
+            //             invalid: 'glyphicon glyphicon-remove',
+            //             validating: 'glyphicon glyphicon-refresh'
+            //         },
+            //         fields: {
+            //             time: {
+            //                 validators: {
+            //                     between: {
+            //                         min: 0.5,
+            //                         max: Math.round(edit_task * 6 * 2) / 2,
+            //                         message: 'Value of task time can be between 0.5 and ' + Math.round(edit_task * 6 * 2) / 2 + " hours",
+            //                     }
+            //                 },
+            //                 notEmpty: {
+            //                     message: 'Please enter task time.'
+            //                 }
+            //             }
+            //         },
+            //     });
+            //
+            //
+            // }else{
+            //     $('#task_form').bootstrapValidator({
+            //         // To use feedback icons, ensure that you use Bootstrap v3.1.0 or later
+            //         framework: 'bootstrap',
+            //         feedbackIcons: {
+            //             valid: 'glyphicon glyphicon-ok',
+            //             invalid: 'glyphicon glyphicon-remove',
+            //             validating: 'glyphicon glyphicon-refresh'
+            //         },
+            //         fields: {
+            //             time: {
+            //                 validators: {
+            //                     between: {
+            //                         min: 0.5,
+            //                         max: Math.round(edit_task*6 * 2) / 2 + Math.round(task_time*6 * 2) / 2,
+            //                         message: 'Value of task time can be between 0.5 and ' + (Math.round(edit_task*6 * 2) / 2 + Math.round(task_time*6 * 2) / 2) + " hours",
+            //                     }
+            //                 },
+            //                 notEmpty: {
+            //                     message: 'Please enter task time.'
+            //                 }
+            //             }
+            //         },
+            //     });
+            // }
+        });
