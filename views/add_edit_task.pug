@@ -59,6 +59,37 @@ block content
                                                     each user in projectUsers
                                                         if(user.id != project.product_owner)
                                                             option(label=user.name selected=(toEditTask && toEditTask.assignee === user.id)) #{user.id}
+
+
+                                            // Član razvojne skupine lahko beleži porabo časa na neki nalogi. (lahko prične z delom na nalogi, ki jo je sprejel. Ob tem se zažene števec časa, ki beleži čas njegovega dela. Naloga se označi kot aktivna).
+                                            //
+                                            // (avtomatsko, samodejno)
+                                            //
+                                            // Član razvojne skupine lahko konča delo na trenutno aktivni nalogi. Ob tem se števec časa zaključi, vloženo delo (število ur) pa se zabeleži v bazo. V primeru, da je ta član v istem dnevu že delal na tej nalogi, se število ur le prišteje k že obstoječemu vpisu.
+                                            //
+                                            // # Preveri regularen potek.
+                                            // # Preveri veljavnost vnešenega časa.
+                                            // # * Preveri za zgodbo, ki je razvijalec ni sprejel.
+                                            // # * Preveri za že zaključene zgodbe.
+                                            if toEditTask
+                                                div.card
+                                                    div.card-header Time Log
+                                                    div.card-body
+                                                        table
+                                                            tr
+                                                                th Date
+                                                                th Duration
+                                                            tr
+                                                                td 1.1.2019
+                                                                td 1h
+                                                        hr
+                                                        div.form-group
+                                                            label(for='task_time_spend') Time spend [h]
+                                                            input#task_time_spend.form-control(type='number' step="0.5" name="time_spend")
+                                                        div.form-group
+                                                            label(for='task_time_estimate') Remaing estimate [h]
+                                                            input#task_time_estimate.form-control(type='number' step="0.5" name="time_estimate")
+
                                             if !toEditTask
                                                 button.btn.btn-primary.center-block.margin-top20#createBtn(type='submit') Create
                                             if toEditTask
