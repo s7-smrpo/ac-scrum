@@ -198,7 +198,7 @@ block content
                                                                                     - count++;
                                                                                     - var time = Math.round(task.time * 6 * 2) / 2;
                                                                                     br
-                                                                                    span - #{task.name} [#{time}h] - #{task.description} - #{task.assigneeTask ? task.assigneeTask : 'not assigned yet'} #{project.product_owner !== uid ? '- ' : ''}
+                                                                                    span - #{task.name} [#{time}h] - #{task.description} - #{task.assigneeTask && !task.is_accepted ? '?' : ''}#{task.assigneeTask ? task.assigneeTask : 'not assigned yet'}#{task.assigneeTask && !task.is_accepted ? '?' : ''} #{project.product_owner !== uid ? '- ' : ''}
                                                                                     if(project.product_owner !== uid)
                                                                                         a.nav-link(href='/tasks/' + task.id + '/edit/', style="display: inline-block; margin: 0; padding: 0;") edit
                                                                             if count === 0
