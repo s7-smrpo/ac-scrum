@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        autoTimer: {
+            field: 'autotimer',
+            type: DataTypes.DATE,
+        },
         assignee: {
             type: DataTypes.INTEGER,
             allowNull: true
