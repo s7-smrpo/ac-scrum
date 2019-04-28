@@ -25,12 +25,66 @@ nav.navbar.navbar-expand-md.navbar-light.fixed-top.border-bottom
         ul.nav.navbar-nav.navbar-right(style="margin-right: 30px;")
             li.nav-item.dropdown
                 a#dropdown01.nav-link.dropdown-toggle(href='#', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false', style="font-size: 9pt")
-                    //i.fa.fa-user(aria-hidden='true')
-                    //i.fa.fa-user-plus(aria-hidden='true' style='color:red;')
-                    i.fa.fa-user-tag(aria-hidden='true' style='color:red;')
+                    if(user && user.pending_task_id != 0)
+                        i.fa.fa-user-tag(aria-hidden='true' style='color:red;')
+                    else
+                        i.fa.fa-user(aria-hidden='true')
                     | #{"   " + username + (isUser ? ' (User) ' : ' (Administrator) ')}
 
                 .dropdown-menu(aria-labelledby='dropdown01')
+                    if(user && user.pending_task_id != 0)
+                        a.dropdown-item(href='#' data-toggle="modal" data-target="#pendingModal") Show pending tasks
+
                     a.dropdown-item(href='/logout') Logout
-                    a.dropdown-item(href='#') Accept assigned tasks
                     //a.dropdown-item(href='#') Something else here
+
+
+.modal.fade(id="pendingModal", tabindex='-1', role='dialog', aria-labelledby='modalTitle' , aria-hidden='true')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                h5.modal-title(id="modalTitle") Pending tasks:
+                button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') x
+            .modal-body.font-16
+                if(pending_tasks)
+                    each task in pending_tasks
+                        div(id='task' + task.id )
+                            span Task: #{task.name}
+                            br
+                            span Description: #{task.description}
+                            br
+                            button.btn.btn-success(type='button' class="accept" id=task.id) Accept
+                            span
+                            span
+                            button.btn.btn-danger(type='button' class="deny" id=task.id) Deny
+                            //a.nav-link(href='/tasks/accept/'+task.id, style="display: inline-block; margin: 0; padding: 0;") Accept
+                            //span /
+                            //a.nav-link(href='/tasks/deny/' + task.id, style="display: inline-block; margin: 0; padding: 0;") Deny
+                            br
+                            br
+
+            .modal-footer
+                button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+
+script.
+    window.addEventListener('load', function () {
+        function acceptTask(elem) {
+            //alert(elem.id);
+            var id = elem.id;
+            $('#task'+id).hide(250);
+        }
+        function denyTask(elem) {
+            alert(elem.id);
+            var id = elem.id;
+            $('#task' + id).hide(250);
+        }
+
+        $('button.accept').click(function () {
+            acceptTask(this);
+        });
+
+        $('button.deny').click(function () {
+            denyTask(this);
+        });
+    });

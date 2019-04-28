@@ -262,5 +262,38 @@ router.get('/:taskId/delete', TasksHelper.checkIfSMorMember, async function(req,
     }
 });
 
+//  ------------- accept/deny a task ----------------
+router.get('/accept/:taskId', TasksHelper.checkIfSMorMember, async function(req, res, next) {
+
+
+    return res.redirect('/');
+    // let projectUsers = await ProjectHelper.getProjectMembers(req.params.projectId);
+    //
+    // let taskStory    = await StoriesHelper.getStory(req.params.storyId);
+    // let storyTasksTimeSum = 0;
+    // let storyTasks   = await TasksHelper.listTasks(req.params.storyId);
+    // for(var i = 0; i < storyTasks.length; i++){
+    //     storyTasksTimeSum += storyTasks[i].time;
+    // }
+    // let available_time_for_new_task = (taskStory.estimatedTime - storyTasksTimeSum) > 0 ? taskStory.estimatedTime - storyTasksTimeSum : 0 ;
+    // let project = await ProjectHelper.getProject(req.params.projectId);
+    //
+    // res.render('add_edit_task', {
+    //     errorMessages: 0,
+    //     success: 0,
+    //     pageName: 'tasks',
+    //     uid: req.user.id,
+    //     username: req.user.username,
+    //     isUser: req.user.is_user,
+    //     projectId: req.params.projectId,
+    //     storyId: req.params.storyId,
+    //     projectUsers: projectUsers,
+    //     toEditTask: false,
+    //     timeForNewTask:available_time_for_new_task,
+    //     project:project,
+    // });
+});
+
+
 
 module.exports = router;
