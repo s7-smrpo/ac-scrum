@@ -11,6 +11,7 @@ var middleware = require('./middleware.js');
 var ProjectHelper = require('../helpers/ProjectHelper');
 var TasksHelper = require('../helpers/TasksHelper');
 var StoriesHelper = require('../helpers/StoriesHelper');
+var UsersHelper = require('../helpers/UsersHelper');
 
 
 //  ------------- create a task ----------------
@@ -93,6 +94,11 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
         }
 
         await createdTask.save();
+
+        if(data.assignee){
+            var newTaskId = createdTask.id;
+            await UsersHelper.set_users_pending_task_id(data.assignee,newTaskId);
+        }
 
         req.flash('success', 'Task - ' + createdTask.name + ' has been successfully created');
         res.render('add_edit_task', {
@@ -181,10 +187,15 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
 
     let projectUsers = await ProjectHelper.getProjectMembers(task.project_id);
 
+    let prev_assignee = task.assignee;
     let assignee = null;
     if (data.assignee) {
         assignee = data.assignee;
+        if(data.assignee != task.assignee){
+            await UsersHelper.set_users_pending_task_id(data.assignee,task_id);
+        }
     }
+
 
     // Set new attributes
     task.setAttributes({
@@ -205,6 +216,10 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
     }
 
     await task.save();
+
+    if(assignee === null && prev_assignee){
+        await UsersHelper.reset_users_pending_task_id(prev_assignee);
+    }
 
     let task_updated = await TasksHelper.getTask(task_id);
 
@@ -236,9 +251,11 @@ router.get('/:taskId/delete', TasksHelper.checkIfSMorMember, async function(req,
             id: task_id,
         }
     });
+    let prev_assignee = task.assignee;
 
     let is_deleted = await TasksHelper.deleteTaskById(task_id);
     if (is_deleted) {
+        await UsersHelper.reset_users_pending_task_id(prev_assignee);
         return res.redirect('/projects/'+ task.project_id +'/view');
     }else{
         return res.status(500).send('Delete failed')

@@ -18,6 +18,15 @@ async function listTasks(storyId) {
     });
 }
 
+async function listAssigneesUnacceptedTasks(assigneeId) {
+    return await Tasks.findAll( {
+        where: {
+            assignee: assigneeId,
+            is_accepted: false,
+        }
+    });
+}
+
 async function listProjectTasks(projectId) {
     return await Tasks.findAll( {
         where: {
@@ -147,5 +156,6 @@ module.exports = {
     deleteTaskById,
     deleteTasksByStoryId,
     isValidTaskChange,
-    checkIfSMorMember
+    checkIfSMorMember,
+    listAssigneesUnacceptedTasks,
 };
