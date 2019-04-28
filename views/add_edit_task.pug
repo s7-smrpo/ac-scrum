@@ -50,8 +50,8 @@ block content
                                                 label(for='task_description') Task description:
                                                 input#task_description.form-control(type='text' placeholder='Enter task description' name='description' value=(toEditTask? toEditTask.description : '') )
                                             div.form-group
-                                                label(for='task_time') Task size [h]
-                                                input#task_time.form-control(type='number' step="0.5" placeholder='Task time' name="time" value=(toEditTask ? Math.round(toEditTask.time * 6 * 2) / 2 : ''))
+                                                label(for='task_time') Task original estimate [h]
+                                                input#task_time.form-control(type='number' step="0.5" placeholder='Task original estimate' name="time" value=(toEditTask ? Math.round(toEditTask.time * 6 * 2) / 2 : ''))
                                             div.form-group
                                                 label(for='assignee') Task assignee
                                                 select#assignee.form-control(name="assignee", placeholder='Assignee')
@@ -79,15 +79,18 @@ block content
                                                             tr
                                                                 th Date
                                                                 th Duration
-                                                            tr
-                                                                td 1.1.2019
-                                                                td 1h
+                                                                th Remaining
+                                                            each tLog in toEditTask.timeLogs
+                                                                tr
+                                                                    td #{ moment(tLog.date).format('DD.MM.YYYY') }
+                                                                    td #{ tLog.spend }h
+                                                                    td #{ tLog.estimate }h
                                                         hr
                                                         div.form-group
                                                             label(for='task_time_spend') Time spend [h]
                                                             input#task_time_spend.form-control(type='number' step="0.5" name="time_spend")
                                                         div.form-group
-                                                            label(for='task_time_estimate') Remaing estimate [h]
+                                                            label(for='task_time_estimate') Remaining estimate [h]
                                                             input#task_time_estimate.form-control(type='number' step="0.5" name="time_estimate")
 
                                             if !toEditTask

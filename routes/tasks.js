@@ -1,4 +1,5 @@
 var express = require('express');
+var moment = require('moment');
 var router = express.Router();
 var models = require('../models/');
 
@@ -186,12 +187,30 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         assignee = data.assignee;
     }
 
+
+    // Time log
+    if (data.time_spend) {
+        const existingEntry = task.timeLogs.find(x => moment(x.date).format("YYYY-MM-DD") === moment().format("YYYY-MM-DD"));
+        if (existingEntry) {
+            existingEntry.spend =  existingEntry.spend + ( + data.time_spend);
+            existingEntry.estimate = +data.time_estimate;
+        } else {
+            task.timeLogs.push({
+                date: new Date(),
+                spend: +data.time_spend,
+                estimate: +data.time_estimate
+            });
+        }
+    }
+
+
     // Set new attributes
     task.setAttributes({
         name: data.name,
         description: data.description,
         time: data.time/6,
-        assignee: assignee
+        assignee: assignee,
+        timeLogs: JSON.stringify(task.timeLogs)
     });
 
     // validate task

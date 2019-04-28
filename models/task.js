@@ -28,6 +28,15 @@ module.exports = (sequelize, DataTypes) => {
                 }
             }
         },
+        /**
+         * It is faster to just parse JSON :D
+         * JSON Structure:
+         *  [{ date: string-date, spend: number, estimate: number },...]
+         */
+        timeLogs: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         assignee: {
             type: DataTypes.INTEGER,
             allowNull: true

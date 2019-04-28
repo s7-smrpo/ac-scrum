@@ -27,11 +27,15 @@ async function listProjectTasks(projectId) {
 }
 
 async function getTask(taskID) {
-    return await Tasks.findOne( {
+    const x = await Tasks.findOne( {
         where: {
             id: taskID,
         }
     });
+    if (x) {
+        timeLogsPropToJson(x);
+    }
+    return x;
 }
 
 async function deleteTaskById(taskId) {
@@ -140,7 +144,20 @@ async function checkIfSMorMember(req, res, next) {
     }
 }
 
+function timeLogsPropToJson(x) {
+    try {
+        x.timeLogs = JSON.parse(x.timeLogs || '[]');
+        x.timeLogs = x.timeLogs.map(x => ({ ...x, spend: + x.spend, date: new Date(x.date) }));
+        x.timeLogs = x.timeLogs.sort((a, b) => a.date - b.date);
+    } catch (e) {
+        console.error(e);
+        x.timeLogs = [];
+    }
+}
+
+
 module.exports = {
+    timeLogsPropToJson,
     listTasks,
     listProjectTasks,
     getTask,
