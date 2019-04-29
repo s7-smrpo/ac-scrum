@@ -45,7 +45,6 @@ router.get('/', middleware.ensureAuthenticated, async function(req, res, next) {
         isUser: req.user.is_user,
         myActiveSprints: myActiveSprints,
         user:req.user,
-        pending_tasks: pending_tasks,
     });
 });
 

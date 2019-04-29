@@ -27,6 +27,23 @@ async function listAssigneesUnacceptedTasks(assigneeId) {
     });
 }
 
+async function setAccepted(taskId) {
+    let task = await getTask(taskId);
+    task.setAttributes({
+        is_accepted: true,
+    });
+    await task.save();
+}
+
+async function setAssignee(taskId,assignee) {
+    let task = await getTask(taskId);
+    task.setAttributes({
+        assignee: assignee,
+    });
+    await task.save();
+}
+
+
 async function listProjectTasks(projectId) {
     return await Tasks.findAll( {
         where: {
@@ -158,4 +175,6 @@ module.exports = {
     isValidTaskChange,
     checkIfSMorMember,
     listAssigneesUnacceptedTasks,
+    setAccepted,
+    setAssignee,
 };

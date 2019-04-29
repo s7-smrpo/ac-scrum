@@ -22,7 +22,7 @@ async function set_users_pending_task_id(uid,task_id){
 async function reset_users_pending_task_id(uid){
     let user = await getUser(uid);
     let assignees_unaccepted_tasks = await TasksHelper.listAssigneesUnacceptedTasks(uid);
-    let pti = (assignees_unaccepted_tasks.length) ? assignees_unaccepted_tasks[0].id : 0;
+    let pti = (assignees_unaccepted_tasks.length > 0) ? assignees_unaccepted_tasks[0].id : 0;
     user.setAttributes({
         pending_task_id: pti,
     });

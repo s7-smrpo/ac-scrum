@@ -191,7 +191,7 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
     let assignee = null;
     if (data.assignee) {
         assignee = data.assignee;
-        if(data.assignee != task.assignee){
+        if(data.assignee != prev_assignee){
             await UsersHelper.set_users_pending_task_id(data.assignee,task_id);
         }
     }
@@ -204,6 +204,14 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         time: data.time/6,
         assignee: assignee
     });
+    if (data.assignee) {
+        assignee = data.assignee;
+        if(data.assignee != prev_assignee){
+            task.setAttributes({
+                is_accepted: false,
+            });
+        }
+    }
 
     // validate task
     if (!await TasksHelper.isValidTaskChange(task)){
@@ -263,35 +271,60 @@ router.get('/:taskId/delete', TasksHelper.checkIfSMorMember, async function(req,
 });
 
 //  ------------- accept/deny a task ----------------
-router.get('/accept/:taskId', TasksHelper.checkIfSMorMember, async function(req, res, next) {
+router.get('/pending', middleware.ensureAuthenticated, async function(req, res, next) {
+    var pending_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.dataValues.id);
+
+    res.render('pending_tasks', {
+        errorMessages: 0,
+        success: 0,
+        pageName: 'tasks',
+        uid: req.user.id,
+        username: req.user.username,
+        isUser: req.user.is_user,
+        pending_tasks: pending_tasks,
+        user:req.user,
+
+    });
+
+});
 
 
-    return res.redirect('/');
-    // let projectUsers = await ProjectHelper.getProjectMembers(req.params.projectId);
-    //
-    // let taskStory    = await StoriesHelper.getStory(req.params.storyId);
-    // let storyTasksTimeSum = 0;
-    // let storyTasks   = await TasksHelper.listTasks(req.params.storyId);
-    // for(var i = 0; i < storyTasks.length; i++){
-    //     storyTasksTimeSum += storyTasks[i].time;
-    // }
-    // let available_time_for_new_task = (taskStory.estimatedTime - storyTasksTimeSum) > 0 ? taskStory.estimatedTime - storyTasksTimeSum : 0 ;
-    // let project = await ProjectHelper.getProject(req.params.projectId);
-    //
-    // res.render('add_edit_task', {
-    //     errorMessages: 0,
-    //     success: 0,
-    //     pageName: 'tasks',
-    //     uid: req.user.id,
-    //     username: req.user.username,
-    //     isUser: req.user.is_user,
-    //     projectId: req.params.projectId,
-    //     storyId: req.params.storyId,
-    //     projectUsers: projectUsers,
-    //     toEditTask: false,
-    //     timeForNewTask:available_time_for_new_task,
-    //     project:project,
-    // });
+router.get('/projectAllowedSprintStories/:id',ProjectHelper.isSMorPM, async function(req, res, next) {
+    let sprint_id = req.query.sprint_id
+    console.log("sprint id: " + sprint_id);
+    let projectStories;
+
+    if (typeof sprint_id !== 'undefined'){
+        projectStories = await StoriesHelper.listSelectableSprintStories(req.params.id,sprint_id);
+    }else{
+        projectStories = await StoriesHelper.listProjectSprintStories(req.params.id);
+    }
+    res.send(JSON.parse(JSON.stringify(projectStories)));
+});
+
+router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, res, next) {
+    let accept_id = req.query.accept_id
+    let deny_id   = req.query.deny_id
+
+
+    // console.log("sprint id: " + sprint_id);
+    let remaining_tasks;
+
+    if (typeof accept_id !== 'undefined'){
+        await TasksHelper.setAccepted(accept_id);
+        await UsersHelper.set_users_pending_task_id(req.user.id,0);
+        await UsersHelper.reset_users_pending_task_id(req.user.id);
+    }else if(typeof deny_id !== 'undefined'){
+        await TasksHelper.setAssignee(deny_id,null);
+        await UsersHelper.set_users_pending_task_id(req.user.id,0);
+        await UsersHelper.reset_users_pending_task_id(req.user.id);
+    }
+
+    remaining_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.id);
+
+
+    res.send(JSON.parse(JSON.stringify(remaining_tasks)));
+
 });
 
 
