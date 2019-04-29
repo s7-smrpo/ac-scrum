@@ -13,7 +13,7 @@ router.get('/', middleware.isAllowed, async function(req, res, next) {
             users: users,
             title: 'AC scrum vol2',
             pageName: 'admin_panel',
-            username: req.user.username,
+            username: req.user.username, user: req.user,
             isUser: req.user.is_user,
             success: 0 });
     }, function (err) {

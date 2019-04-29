@@ -41,10 +41,9 @@ router.get('/', middleware.ensureAuthenticated, async function(req, res, next) {
         title: 'AC scrum vol2',
         pageName: 'dashboard',
         myProjects: myProjects,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         myActiveSprints: myActiveSprints,
-        user:req.user,
     });
 });
 

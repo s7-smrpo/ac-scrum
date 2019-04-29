@@ -32,7 +32,7 @@ router.get('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async f
         success: 0,
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         projectId: req.params.projectId,
         storyId: req.params.storyId,
@@ -81,7 +81,7 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
                 success: 0,
                 pageName: 'tasks',
                 uid: req.user.id,
-                username: req.user.username,
+                username: req.user.username, user: req.user,
                 isUser: req.user.is_user,
                 projectId: req.params.projectId,
                 storyId: req.params.storyId,
@@ -106,7 +106,7 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
             success: req.flash('success'),
             pageName: 'tasks',
             uid: req.user.id,
-            username: req.user.username,
+            username: req.user.username, user: req.user,
             isUser: req.user.is_user,
             projectId: req.params.projectId,
             storyId: req.params.storyId,
@@ -124,7 +124,7 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
             success: 0,
             pageName: 'tasks',
             uid: req.user.id,
-            username: req.user.username,
+            username: req.user.username, user: req.user,
             isUser: req.user.is_user,
             projectId: req.params.projectId,
             storyId: req.params.storyId,
@@ -157,7 +157,7 @@ router.get('/:taskId/edit', TasksHelper.checkIfSMorMember, async function(req, r
         success: 0,
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         projectId: currentTask.project_id,
         storyId: currentTask.story_id,
@@ -217,7 +217,7 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
     if (!await TasksHelper.isValidTaskChange(task)){
         req.flash('error', `Task name: ${task.name} already in use`);
         res.render('add_edit_task', {
-            errorMessages: req.flash('error'), success: 0, pageName: 'tasks', uid: req.user.id, username: req.user.username,
+            errorMessages: req.flash('error'), success: 0, pageName: 'tasks', uid: req.user.id, username: req.user.username, user: req.user,
             isUser: req.user.is_user, projectId: task.project_id, storyId: task.story_id, projectUsers: projectUsers, toEditTask: false,
             timeForNewTask:available_time_for_new_task,project:project,
         });
@@ -237,7 +237,7 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         success: req.flash('success'),
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         projectId: task.project_id,
         storyId: task.story_id,
@@ -279,27 +279,13 @@ router.get('/pending', middleware.ensureAuthenticated, async function(req, res, 
         success: 0,
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         pending_tasks: pending_tasks,
         user:req.user,
 
     });
 
-});
-
-
-router.get('/projectAllowedSprintStories/:id',ProjectHelper.isSMorPM, async function(req, res, next) {
-    let sprint_id = req.query.sprint_id
-    console.log("sprint id: " + sprint_id);
-    let projectStories;
-
-    if (typeof sprint_id !== 'undefined'){
-        projectStories = await StoriesHelper.listSelectableSprintStories(req.params.id,sprint_id);
-    }else{
-        projectStories = await StoriesHelper.listProjectSprintStories(req.params.id);
-    }
-    res.send(JSON.parse(JSON.stringify(projectStories)));
 });
 
 router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, res, next) {
@@ -326,6 +312,22 @@ router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, re
     res.send(JSON.parse(JSON.stringify(remaining_tasks)));
 
 });
+
+//  ------------- list sprint stories ----------------
+router.get('/projectAllowedSprintStories/:id',ProjectHelper.isSMorPM, async function(req, res, next) {
+    let sprint_id = req.query.sprint_id
+    console.log("sprint id: " + sprint_id);
+    let projectStories;
+
+    if (typeof sprint_id !== 'undefined'){
+        projectStories = await StoriesHelper.listSelectableSprintStories(req.params.id,sprint_id);
+    }else{
+        projectStories = await StoriesHelper.listProjectSprintStories(req.params.id);
+    }
+    res.send(JSON.parse(JSON.stringify(projectStories)));
+});
+
+
 
 
 

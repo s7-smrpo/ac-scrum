@@ -38,7 +38,7 @@ router.get('/project/:id', async function(req, res, next) {
         success: 0, 
         stories: projectStories, 
         uid: req.user.id, 
-        username: req.user.username, 
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user
     });
 });
@@ -55,7 +55,7 @@ router.get('/project/:id/create', ProjectHelper.isSMorPM, async function(req, re
         projectId: project_id, 
         importance_values: importance_values, 
         uid: req.user.id, 
-        username: req.user.username, 
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user
     });
 });
@@ -84,20 +84,20 @@ router.post('/project/:id/create', ProjectHelper.isSMorPM, async function(req, r
         if (!await StoriesHelper.isValidName(createdUserStory)){
             req.flash(req.flash('error', `Story Name: ${createdUserStory.name} already in use`));
             return res.render('stories', { errorMessages: req.flash('error'), success: 0,
-                projectId: project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, isUser: req.user.is_user});
+                projectId: project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, user: req.user, isUser: req.user.is_user});
         }
 
         await createdUserStory.save();
 
         req.flash('success', 'User story - ' + createdUserStory.name + ' has been successfully created');
         res.render('stories', { errorMessages: 0, success: req.flash('success'),
-            projectId: project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, isUser: req.user.is_user});
+            projectId: project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, user: req.user, isUser: req.user.is_user});
 
     } catch (e) {
         console.log(e);
         req.flash('error', 'Error!');
         res.render('stories', { errorMessages: req.flash('error'), success: 0,
-            projectId: project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, isUser: req.user.is_user});
+            projectId: project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, user: req.user, isUser: req.user.is_user});
 
     }
 
@@ -123,7 +123,7 @@ router.get('/:id/edit/', StoriesHelper.checkIfSMorPM, async function(req, res, n
         importance_values: importance_values,
         isSM: isSM,
         uid: req.user.id, 
-        username: req.user.username, 
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user
     });
 
@@ -162,7 +162,7 @@ router.post('/:id/edit/', StoriesHelper.checkIfSMorPM, async function(req, res, 
         let storyObject = await StoriesHelper.getStory(story.id);
         req.flash('error', `Project Name: ${story.name} already in use`);
         return res.render('stories', { errorMessages: req.flash('error'), success: 0, userStory: storyObject, isSM: isSM,
-            projectId: story.project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, isUser: req.user.is_user});
+            projectId: story.project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, user: req.user, isUser: req.user.is_user});
     }
 
     await story.save();
@@ -171,7 +171,7 @@ router.post('/:id/edit/', StoriesHelper.checkIfSMorPM, async function(req, res, 
 
     req.flash('success', 'User story - ' + story.name + ' has been successfully updated');
     return res.render('stories', { errorMessages: 0, success: req.flash('success'), userStory: story_updated, isSM: isSM,
-        projectId: story.project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, isUser: req.user.is_user});
+        projectId: story.project_id, importance_values: importance_values, uid: req.user.id, username: req.user.username, user: req.user, isUser: req.user.is_user});
 
 });
 
