@@ -6,26 +6,26 @@ block content
             .container.theme-showcase
                 .page-header
                     .page-header
-                        h3 Pending tasks
+                        h3 Accepted tasks
                     hr
 
                     div.main.container
                         div.row
                             div.col-md-12
-                                if(pending_tasks)
-                                    each task in pending_tasks
+                                if(accepted_tasks)
+                                    each task in accepted_tasks
                                         .card(id='task' + task.id)
                                             .card-header
-                                                | Pending task
+                                                | Accepted task
                                             .card-body
                                                 h5.card-title #{task.name}
                                                 p.card-text #{task.description}
                                                 - var time = Math.round(task.time * 6 * 2) / 2;
                                                 p.card-text Estimated time: [#{time}h]
 
-                                                button.btn.btn-success(type='button' class="accept" id=task.id) Accept
-                                                |
-                                                |
+                                                //button.btn.btn-success(type='button' class="accept" id=task.id) Accept
+                                                //|
+                                                //|
                                                 button.btn.btn-danger(type='button' class="deny" id=task.id) Reject
                                         br
 
@@ -36,7 +36,7 @@ block content
             function acceptTask(isAccept,elem) {
                 var id = elem.id;
                 var req_data = {accept_id: id};
-                if(!isAccept)req_data = {deny_id: id}
+                if(!isAccept)req_data = {deny_accepted_id: id}
 
                 $.ajax({
                     url: '/tasks/acceptDeny',

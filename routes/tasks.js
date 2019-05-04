@@ -288,9 +288,25 @@ router.get('/pending', middleware.ensureAuthenticated, async function(req, res, 
 
 });
 
+router.get('/accepted', middleware.ensureAuthenticated, async function(req, res, next) {
+    var accepted_tasks = await TasksHelper.listAssigneesAcceptedTasks(req.user.dataValues.id);
+
+    res.render('accepted_tasks', {
+        errorMessages: 0,
+        success: 0,
+        pageName: 'tasks',
+        uid: req.user.id,
+        username: req.user.username, user: req.user,
+        isUser: req.user.is_user,
+        accepted_tasks: accepted_tasks,
+        user:req.user,
+    });
+});
+
 router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, res, next) {
-    let accept_id = req.query.accept_id
-    let deny_id   = req.query.deny_id
+    let accept_id          = req.query.accept_id
+    let deny_id            = req.query.deny_id
+    let deny_accepted_id   = req.query.deny_accepted_id
 
 
     // console.log("sprint id: " + sprint_id);
@@ -304,6 +320,8 @@ router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, re
         await TasksHelper.setAssignee(deny_id,null);
         await UsersHelper.set_users_pending_task_id(req.user.id,0);
         await UsersHelper.reset_users_pending_task_id(req.user.id);
+    }else if(typeof deny_accepted_id !== 'undefined'){
+        await TasksHelper.setAssignee(deny_accepted_id,null);
     }
 
     remaining_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.id);

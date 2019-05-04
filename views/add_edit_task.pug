@@ -58,7 +58,10 @@ block content
                                                     option
                                                     each user in projectUsers
                                                         if(user.id != project.product_owner)
-                                                            option(label=user.name selected=(toEditTask && toEditTask.assignee === user.id)) #{user.id}
+                                                            - var label_text = user.name;
+                                                            if(toEditTask && toEditTask.assignee === user.id)
+                                                                - label_text += (!toEditTask.is_accepted) ? "?" : "";
+                                                            option(label=label_text selected=(toEditTask && toEditTask.assignee === user.id)) #{user.id}
 
 
                                             // Član razvojne skupine lahko beleži porabo časa na neki nalogi. (lahko prične z delom na nalogi, ki jo je sprejel. Ob tem se zažene števec časa, ki beleži čas njegovega dela. Naloga se označi kot aktivna).

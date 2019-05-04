@@ -27,6 +27,16 @@ async function listAssigneesUnacceptedTasks(assigneeId) {
     });
 }
 
+async function listAssigneesAcceptedTasks(assigneeId) {
+    return await Tasks.findAll( {
+        where: {
+            assignee: assigneeId,
+            is_accepted: true,
+            is_done: false,
+        }
+    });
+}
+
 async function setAccepted(taskId) {
     let task = await getTask(taskId);
     task.setAttributes({
@@ -177,4 +187,5 @@ module.exports = {
     listAssigneesUnacceptedTasks,
     setAccepted,
     setAssignee,
+    listAssigneesAcceptedTasks,
 };
