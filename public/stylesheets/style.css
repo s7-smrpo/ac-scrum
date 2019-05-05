@@ -109,3 +109,12 @@ nav {
 .dt-blue {
   background-color: aliceblue !important;
 }
+
+
+.auto-time-check {
+  display: inline-block !important;
+  width: 100px !important;
+  font-size: 0.5rem !important;
+  position: relative !important;
+  top: 5px !important;
+}

@@ -1,4 +1,5 @@
 var express = require('express');
+var moment = require('moment');
 var router = express.Router();
 var models = require('../models/');
 
@@ -196,13 +197,63 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         }
     }
 
+    if (data.time_auto === 'on') {
+        task.autoTimer = new Date();
+    } else {
+        if ( task.autoTimer) {
+            if (data.time_spend) {
+                data.time_spend = + data.time_spend;
+            } else {
+                data.time_spend = 0;
+            }
+            const duration = moment.duration(moment().diff( moment( task.autoTimer)));
+            let hours = duration.asHours();
+            if (hours < 1) {
+                if (hours == 0) {
+                    // noop
+                } else {
+                    hours = 0.5;
+                }
+            } else {
+                hours = Math.round(hours);
+            }
+            data.time_spend += hours;
+        }
+        task.autoTimer = null;
+    }
+
+    // Time log
+    if (data.time_spend) {
+        let last = task.timeLogs ? task.timeLogs[task.timeLogs.length - 1] : null;
+        let remaining = last ? last.estimate : (+task.time);
+
+        if (data.time_estimate === undefined) {
+            data.time_estimate = remaining - ( + data.time_spend);
+            if (data.time_estimate  < 0) {
+                data.time_estimate = 0;
+            }
+        }
+
+        const existingEntry = task.timeLogs.find(x => moment(x.date).format("YYYY-MM-DD") === moment().format("YYYY-MM-DD"));
+        if (existingEntry) {
+            existingEntry.spend =  existingEntry.spend + ( + data.time_spend);
+            existingEntry.estimate = +data.time_estimate;
+        } else {
+            task.timeLogs.push({
+                date: new Date(),
+                spend: +data.time_spend,
+                estimate: +data.time_estimate
+            });
+        }
+    }
 
     // Set new attributes
     task.setAttributes({
         name: data.name,
         description: data.description,
         time: data.time/6,
-        assignee: assignee
+        assignee: assignee,
+        timeLogs: JSON.stringify(task.timeLogs)
     });
     if (data.assignee) {
         assignee = data.assignee;
