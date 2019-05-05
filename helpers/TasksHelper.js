@@ -18,6 +18,42 @@ async function listTasks(storyId) {
     });
 }
 
+async function listAssigneesUnacceptedTasks(assigneeId) {
+    return await Tasks.findAll( {
+        where: {
+            assignee: assigneeId,
+            is_accepted: false,
+        }
+    });
+}
+
+async function listAssigneesAcceptedTasks(assigneeId) {
+    return await Tasks.findAll( {
+        where: {
+            assignee: assigneeId,
+            is_accepted: true,
+            is_done: false,
+        }
+    });
+}
+
+async function setAccepted(taskId) {
+    let task = await getTask(taskId);
+    task.setAttributes({
+        is_accepted: true,
+    });
+    await task.save();
+}
+
+async function setAssignee(taskId,assignee) {
+    let task = await getTask(taskId);
+    task.setAttributes({
+        assignee: assignee,
+    });
+    await task.save();
+}
+
+
 async function listProjectTasks(projectId) {
     return await Tasks.findAll( {
         where: {
@@ -164,5 +200,9 @@ module.exports = {
     deleteTaskById,
     deleteTasksByStoryId,
     isValidTaskChange,
-    checkIfSMorMember
+    checkIfSMorMember,
+    listAssigneesUnacceptedTasks,
+    setAccepted,
+    setAssignee,
+    listAssigneesAcceptedTasks,
 };

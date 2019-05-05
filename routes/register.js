@@ -8,7 +8,7 @@ var User = models.User;
 
 router.get('/', middleware.isAllowed, function(req, res, next) {
     res.render('register', { errorMessages: 0, title: 'AC scrum vol2',
-        pageName: 'admin_panel', username: req.user.username,
+        pageName: 'admin_panel', username: req.user.username, user: req.user, user: req.user,
         isUser: req.user.is_user, success: 0 });
 });
 
@@ -16,7 +16,7 @@ router.post('/', middleware.isAllowed, function (req, res, next) {
     var data = req.body;
     if (data.password !== data.password2) {
         req.flash('error', 'Passwords do not match.');
-        res.render('register', { errorMessages: req.flash('error'), title: 'AC scrum vol2', pageName: 'admin_panel', username: req.user.username, isUser: req.user.is_user });
+        res.render('register', { errorMessages: req.flash('error'), title: 'AC scrum vol2', pageName: 'admin_panel', username: req.user.username, user: req.user, user: req.user, isUser: req.user.is_user });
     }
 
     if (data.is_user === undefined) {
@@ -27,13 +27,13 @@ router.post('/', middleware.isAllowed, function (req, res, next) {
         req.flash('success', createdUser.username);
         res.render('register', { success: req.flash('success'), errorMessages: 0,
             title: 'AC scrum vol2', pageName: 'admin_panel',
-            username: req.user.username, isUser: req.user.is_user });
+            username: req.user.username, user: req.user, user: req.user, isUser: req.user.is_user });
 
     }, function (err) {
         req.flash('error', 'Error.');
         res.render('register', { errorMessages: req.flash('error'), success: 0,
             title: 'AC scrum vol2', pageName: 'admin_panel',
-            username: req.user.username, isUser: req.user.is_user });
+            username: req.user.username, user: req.user, isUser: req.user.is_user });
         // throw err;
     });
 });

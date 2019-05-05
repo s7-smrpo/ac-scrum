@@ -12,6 +12,7 @@ var middleware = require('./middleware.js');
 var ProjectHelper = require('../helpers/ProjectHelper');
 var TasksHelper = require('../helpers/TasksHelper');
 var StoriesHelper = require('../helpers/StoriesHelper');
+var UsersHelper = require('../helpers/UsersHelper');
 
 
 //  ------------- create a task ----------------
@@ -32,7 +33,7 @@ router.get('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async f
         success: 0,
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         projectId: req.params.projectId,
         storyId: req.params.storyId,
@@ -81,7 +82,7 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
                 success: 0,
                 pageName: 'tasks',
                 uid: req.user.id,
-                username: req.user.username,
+                username: req.user.username, user: req.user,
                 isUser: req.user.is_user,
                 projectId: req.params.projectId,
                 storyId: req.params.storyId,
@@ -95,13 +96,18 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
 
         await createdTask.save();
 
+        if(data.assignee){
+            var newTaskId = createdTask.id;
+            await UsersHelper.set_users_pending_task_id(data.assignee,newTaskId);
+        }
+
         req.flash('success', 'Task - ' + createdTask.name + ' has been successfully created');
         res.render('add_edit_task', {
             errorMessages: 0,
             success: req.flash('success'),
             pageName: 'tasks',
             uid: req.user.id,
-            username: req.user.username,
+            username: req.user.username, user: req.user,
             isUser: req.user.is_user,
             projectId: req.params.projectId,
             storyId: req.params.storyId,
@@ -119,7 +125,7 @@ router.post('/create/:projectId/:storyId', TasksHelper.checkIfSMorMember, async 
             success: 0,
             pageName: 'tasks',
             uid: req.user.id,
-            username: req.user.username,
+            username: req.user.username, user: req.user,
             isUser: req.user.is_user,
             projectId: req.params.projectId,
             storyId: req.params.storyId,
@@ -152,7 +158,7 @@ router.get('/:taskId/edit', TasksHelper.checkIfSMorMember, async function(req, r
         success: 0,
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         projectId: currentTask.project_id,
         storyId: currentTask.story_id,
@@ -182,9 +188,13 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
 
     let projectUsers = await ProjectHelper.getProjectMembers(task.project_id);
 
+    let prev_assignee = task.assignee;
     let assignee = null;
     if (data.assignee) {
         assignee = data.assignee;
+        if(data.assignee != prev_assignee){
+            await UsersHelper.set_users_pending_task_id(data.assignee,task_id);
+        }
     }
 
     if (data.time_auto === 'on') {
@@ -237,7 +247,6 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         }
     }
 
-
     // Set new attributes
     task.setAttributes({
         name: data.name,
@@ -246,18 +255,30 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         assignee: assignee,
         timeLogs: JSON.stringify(task.timeLogs)
     });
+    if (data.assignee) {
+        assignee = data.assignee;
+        if(data.assignee != prev_assignee){
+            task.setAttributes({
+                is_accepted: false,
+            });
+        }
+    }
 
     // validate task
     if (!await TasksHelper.isValidTaskChange(task)){
         req.flash('error', `Task name: ${task.name} already in use`);
         res.render('add_edit_task', {
-            errorMessages: req.flash('error'), success: 0, pageName: 'tasks', uid: req.user.id, username: req.user.username,
+            errorMessages: req.flash('error'), success: 0, pageName: 'tasks', uid: req.user.id, username: req.user.username, user: req.user,
             isUser: req.user.is_user, projectId: task.project_id, storyId: task.story_id, projectUsers: projectUsers, toEditTask: false,
             timeForNewTask:available_time_for_new_task,project:project,
         });
     }
 
     await task.save();
+
+    if(assignee === null && prev_assignee){
+        await UsersHelper.reset_users_pending_task_id(prev_assignee);
+    }
 
     let task_updated = await TasksHelper.getTask(task_id);
 
@@ -267,7 +288,7 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         success: req.flash('success'),
         pageName: 'tasks',
         uid: req.user.id,
-        username: req.user.username,
+        username: req.user.username, user: req.user,
         isUser: req.user.is_user,
         projectId: task.project_id,
         storyId: task.story_id,
@@ -289,14 +310,94 @@ router.get('/:taskId/delete', TasksHelper.checkIfSMorMember, async function(req,
             id: task_id,
         }
     });
+    let prev_assignee = task.assignee;
 
     let is_deleted = await TasksHelper.deleteTaskById(task_id);
     if (is_deleted) {
+        await UsersHelper.reset_users_pending_task_id(prev_assignee);
         return res.redirect('/projects/'+ task.project_id +'/view');
     }else{
         return res.status(500).send('Delete failed')
     }
 });
+
+//  ------------- accept/deny a task ----------------
+router.get('/pending', middleware.ensureAuthenticated, async function(req, res, next) {
+    var pending_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.dataValues.id);
+
+    res.render('pending_tasks', {
+        errorMessages: 0,
+        success: 0,
+        pageName: 'tasks',
+        uid: req.user.id,
+        username: req.user.username, user: req.user,
+        isUser: req.user.is_user,
+        pending_tasks: pending_tasks,
+        user:req.user,
+
+    });
+
+});
+
+router.get('/accepted', middleware.ensureAuthenticated, async function(req, res, next) {
+    var accepted_tasks = await TasksHelper.listAssigneesAcceptedTasks(req.user.dataValues.id);
+
+    res.render('accepted_tasks', {
+        errorMessages: 0,
+        success: 0,
+        pageName: 'tasks',
+        uid: req.user.id,
+        username: req.user.username, user: req.user,
+        isUser: req.user.is_user,
+        accepted_tasks: accepted_tasks,
+        user:req.user,
+    });
+});
+
+router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, res, next) {
+    let accept_id          = req.query.accept_id
+    let deny_id            = req.query.deny_id
+    let deny_accepted_id   = req.query.deny_accepted_id
+
+
+    // console.log("sprint id: " + sprint_id);
+    let remaining_tasks;
+
+    if (typeof accept_id !== 'undefined'){
+        await TasksHelper.setAccepted(accept_id);
+        await UsersHelper.set_users_pending_task_id(req.user.id,0);
+        await UsersHelper.reset_users_pending_task_id(req.user.id);
+    }else if(typeof deny_id !== 'undefined'){
+        await TasksHelper.setAssignee(deny_id,null);
+        await UsersHelper.set_users_pending_task_id(req.user.id,0);
+        await UsersHelper.reset_users_pending_task_id(req.user.id);
+    }else if(typeof deny_accepted_id !== 'undefined'){
+        await TasksHelper.setAssignee(deny_accepted_id,null);
+    }
+
+    remaining_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.id);
+
+
+    res.send(JSON.parse(JSON.stringify(remaining_tasks)));
+
+});
+
+//  ------------- list sprint stories ----------------
+router.get('/projectAllowedSprintStories/:id',ProjectHelper.isSMorPM, async function(req, res, next) {
+    let sprint_id = req.query.sprint_id
+    console.log("sprint id: " + sprint_id);
+    let projectStories;
+
+    if (typeof sprint_id !== 'undefined'){
+        projectStories = await StoriesHelper.listSelectableSprintStories(req.params.id,sprint_id);
+    }else{
+        projectStories = await StoriesHelper.listProjectSprintStories(req.params.id);
+    }
+    res.send(JSON.parse(JSON.stringify(projectStories)));
+});
+
+
+
 
 
 module.exports = router;

@@ -21,7 +21,7 @@ router.get('/', middleware.ensureAuthenticated, async function(req, res, next) {
     // let userProjects = await ProjectHelper.listUserProjects();
     let projects = await ProjectHelper.getAllowedProjects(req.user.id);
 
-    res.render('projects', { errorMessages: 0, success: 0, pageName: 'projects', projects: projects, username: req.user.username, isUser: req.user.is_user, uid:req.user.id});
+    res.render('projects', { errorMessages: 0, success: 0, pageName: 'projects', projects: projects, username: req.user.username, user: req.user, isUser: req.user.is_user, uid:req.user.id});
 });
 
 // ------------------ endpoint for project page ------------------
@@ -51,7 +51,7 @@ router.get('/:id/view', ProjectHelper.canAccessProject, async function(req, res,
     }
     
     res.render('project', { errorMessages: 0, success: 0, pageName: 'projects', project: currentProject,
-        stories: projectStories, tasks: projectTasks, uid: req.user.id, username: req.user.username,
+        stories: projectStories, tasks: projectTasks, uid: req.user.id, username: req.user.username, user: req.user,
         isClickable: req.user.name === currentProject.ProductOwner.name || req.user.name === currentProject.ScrumMaster.name,
         isUser: req.user.is_user,
     activeSprintId:activeSprintId});
@@ -63,7 +63,7 @@ router.get('/:id/edit/', ProjectHelper.isSMorAdmin, async function(req, res, nex
     let toEditProject = await ProjectHelper.getProjectToEdit(req.params.id);
     let users = await User.findAllUsers();
     res.render('add_edit_project', { errorMessages: 0, title: 'AC scrum vol2', users: users,
-        pageName: 'projects', username: req.user.username, toEditProject: toEditProject,
+        pageName: 'projects', username: req.user.username, user: req.user, toEditProject: toEditProject,
         isUser: req.user.is_user, success: 0 });
 });
 
@@ -93,7 +93,7 @@ router.post('/:id/edit/', ProjectHelper.isSMorAdmin, async function(req, res, ne
         req.flash('error', `Project Name: ${project.name} already in use!`);
         res.render('add_edit_project', { errorMessages: req.flash('error'), users:users, success: 0,
             title: 'AC scrum vol2', pageName: 'projects', toEditProject:toEditProject,
-            username: req.user.username, isUser: req.user.is_user });
+            username: req.user.username, user: req.user, isUser: req.user.is_user });
         return;
     }
 
@@ -113,7 +113,7 @@ router.post('/:id/edit/', ProjectHelper.isSMorAdmin, async function(req, res, ne
 
     req.flash('success', 'Project: '+ project.name + ' has been successfully updated');
     return res.render('add_edit_project', { errorMessages: 0, title: 'AC scrum vol2', users: users,
-        pageName: 'projects', username: req.user.username, toEditProject: toEditProject,
+        pageName: 'projects', username: req.user.username, user: req.user, toEditProject: toEditProject,
         isUser: req.user.is_user, success: req.flash('success') });
 });
 
@@ -126,7 +126,7 @@ router.post('/:id/edit/', ProjectHelper.isSMorAdmin, async function(req, res, ne
 router.get('/create/', middleware.isAllowed, async function(req, res, next) {
     let users = await User.findAllUsers();
     res.render('add_edit_project', { errorMessages: 0, title: 'AC scrum vol2', users: users,
-        pageName: 'projects', username: req.user.username,
+        pageName: 'projects', username: req.user.username, user: req.user,
         isUser: req.user.is_user, success: 0 });
 });
 
@@ -152,7 +152,7 @@ router.post('/create/', middleware.isAllowed, async function(req, res, next) {
             req.flash(req.flash('error', `Project Name: ${createdProject.name} already in use!`));
             return res.render('add_edit_project', { errorMessages: req.flash('error'),users:users, success: 0,
                 title: 'AC scrum vol2', pageName: 'projects',
-                username: req.user.username, isUser: req.user.is_user });
+                username: req.user.username, user: req.user, isUser: req.user.is_user });
         }
 
         await createdProject.save();
@@ -162,12 +162,12 @@ router.post('/create/', middleware.isAllowed, async function(req, res, next) {
         req.flash('success', 'New Projects - ' + createdProject.name + ' has been successfully added');
         res.render('add_edit_project', { success: req.flash('success'),users:users, errorMessages: 0,
             title: 'AC scrum vol2', pageName: 'projects',
-            username: req.user.username, isUser: req.user.is_user });
+            username: req.user.username, user: req.user, isUser: req.user.is_user });
     } catch (e) {
         req.flash('error', 'Error!');
         res.render('add_edit_project', { errorMessages: req.flash('error'),users:[], success: 0,
             title: 'AC scrum vol2', pageName: 'projects',
-            username: req.user.username, isUser: req.user.is_user });
+            username: req.user.username, user: req.user, isUser: req.user.is_user });
 
     }
 

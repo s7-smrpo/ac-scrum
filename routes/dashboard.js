@@ -6,6 +6,7 @@ var Project = models.Project;
 var UserProject = models.UserProject;
 
 var ProjectHelper = require('../helpers/ProjectHelper');
+const TasksHelper = require('../helpers/TasksHelper');
 
 /* GET home page. */
 router.get('/', middleware.ensureAuthenticated, async function(req, res, next) {
@@ -34,7 +35,16 @@ router.get('/', middleware.ensureAuthenticated, async function(req, res, next) {
         }
     });
 
-    res.render('dashboard', { title: 'AC scrum vol2', pageName: 'dashboard', myProjects: myProjects, username: req.user.username, isUser: req.user.is_user, myActiveSprints: myActiveSprints });
+    var pending_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.dataValues.id);
+
+    res.render('dashboard', {
+        title: 'AC scrum vol2',
+        pageName: 'dashboard',
+        myProjects: myProjects,
+        username: req.user.username, user: req.user,
+        isUser: req.user.is_user,
+        myActiveSprints: myActiveSprints,
+    });
 });
 
 router.get('/projects', function(req, res, next) {

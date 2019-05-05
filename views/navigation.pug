@@ -25,10 +25,22 @@ nav.navbar.navbar-expand-md.navbar-light.fixed-top.border-bottom
         ul.nav.navbar-nav.navbar-right(style="margin-right: 30px;")
             li.nav-item.dropdown
                 a#dropdown01.nav-link.dropdown-toggle(href='#', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false', style="font-size: 9pt")
-                    i.fa.fa-user(aria-hidden='true')
+                    if(user && user.pending_task_id != 0)
+                        i.fa.fa-user-tag(aria-hidden='true' style='color:red;')
+                        i.fa.fa-user(aria-hidden='true' style='display:none;')
+
+                    else
+                        i.fa.fa-user(aria-hidden='true')
+                        i.fa.fa-user-tag(aria-hidden='true' style='color:red; display:none;')
+
                     | #{"   " + username + (isUser ? ' (User) ' : ' (Administrator) ')}
 
                 .dropdown-menu(aria-labelledby='dropdown01')
+                    if(user && user.pending_task_id != 0)
+                        a.dropdown-item(href='/tasks/pending') Show pending tasks
+
                     a.dropdown-item(href='/logout') Logout
-                    //a.dropdown-item(href='#') Another action
+                    a.dropdown-item(href='/tasks/accepted') Show accepted tasks
                     //a.dropdown-item(href='#') Something else here
+
+
