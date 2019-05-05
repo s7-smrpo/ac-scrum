@@ -12,7 +12,9 @@ module.exports = {
         name: 'Ana',
         surname: 'Administrator',
         email: 'ana@student.fri.uni-lj.si',
-        is_user: 0
+        is_user: 0,
+        pending_task_id: 0,
+
       },
       {
         username: 'berta',
@@ -21,6 +23,7 @@ module.exports = {
         surname: 'Novak',
         email: 'berta.user@student.fri.uni-lj.si',
         is_user: 0,
+        pending_task_id: 0,
 
       },
       {
@@ -30,6 +33,7 @@ module.exports = {
         surname: 'Hrovat',
         email: 'cilka.user@student.fri.uni-lj.si',
         is_user: 1,
+        pending_task_id: 0,
       },
       {
         username: 'danijel',
@@ -38,6 +42,7 @@ module.exports = {
         surname: 'Kovačič',
         email: 'deni.admin@student.fri.uni-lj.si',
         is_user: 1,
+        pending_task_id: 0,
       },
       {
         username: 'edo',
@@ -46,6 +51,7 @@ module.exports = {
         surname: 'Zupančič',
         email: 'edi.user@student.fri.uni-lj.si',
         is_user: 1,
+        pending_task_id: 0,
       },
       {
         username: 'smsm',
@@ -54,6 +60,7 @@ module.exports = {
         surname: 'Smsm',
         email: 'ls8856@student.fri.uni-lj.si',
         is_user: 1,
+        pending_task_id: 0,
       },
       {
         username: 'popo',
@@ -62,6 +69,7 @@ module.exports = {
         surname: 'Popo',
         email: 'ls8856@student.fri.uni-lj.si',
         is_user: 1,
+        pending_task_id: 0,
       },
       {
         username: 'markopozenel',
@@ -70,6 +78,7 @@ module.exports = {
         surname: 'Poženel',
         email: 'marko.pozenel@fri.uni-lj.si',
         is_user: 1,
+        pending_task_id: 2,
       },
 
     ], {});
