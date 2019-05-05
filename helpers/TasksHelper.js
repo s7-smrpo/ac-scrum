@@ -38,7 +38,7 @@ async function listAssigneesAcceptedTasks(assigneeId) {
 }
 
 async function setAccepted(taskId) {
-    let task = await getTask(taskId);
+    let task = await getPlainTask(taskId);
     task.setAttributes({
         is_accepted: true,
     });
@@ -46,7 +46,7 @@ async function setAccepted(taskId) {
 }
 
 async function setAssignee(taskId,assignee) {
-    let task = await getTask(taskId);
+    let task = await getPlainTask(taskId);
     task.setAttributes({
         assignee: assignee,
     });
@@ -60,6 +60,15 @@ async function listProjectTasks(projectId) {
             project_id: projectId,
         }
     });
+}
+
+async function getPlainTask(taskID) {
+    const x = await Tasks.findOne( {
+        where: {
+            id: taskID,
+        }
+    });
+    return x;
 }
 
 async function getTask(taskID) {
