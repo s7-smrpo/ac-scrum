@@ -26,6 +26,9 @@ block content
                                                 //button.btn.btn-success(type='button' class="accept" id=task.id) Accept
                                                 //|
                                                 //|
+                                                button.btn.btn-success(type='button' class="done" id=task.id) Done
+                                                |
+                                                |
                                                 button.btn.btn-danger(type='button' class="deny" id=task.id) Reject
                                         br
 
@@ -57,6 +60,29 @@ block content
                 });
             }
 
+            function doneTask(elem) {
+                var id = elem.id;
+                var req_data = {task_id: id};
+
+                $.ajax({
+                    url: '/tasks/setDone',
+                    method: 'GET',
+                    data: req_data,
+                }).done(function (res) {
+                    $('.card#task' + id).hide(250);
+                    var rem_tasks = [];
+                    for (const sto of res) {
+                        var remain = JSON.parse(JSON.stringify(sto));
+                        rem_tasks.push(remain);
+                    }
+                    if (rem_tasks.length == 0) {
+                        $('.fa-user-tag').hide(250);
+                        $('.fa-user').show(250);
+
+                    }
+                });
+            }
+
 
             $('button.accept').click(function () {
                 acceptTask(true,this);
@@ -64,5 +90,9 @@ block content
 
             $('button.deny').click(function () {
                 acceptTask(false,this);
+            });
+
+            $('button.done').click(function () {
+                doneTask(this);
             });
         });

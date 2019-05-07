@@ -382,6 +382,16 @@ router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, re
 
 });
 
+router.get('/setDone', middleware.ensureAuthenticated, async function(req, res, next) {
+    let taskId = req.query.task_id;
+
+    await TasksHelper.setDone(taskId);
+
+    let remaining_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.id);
+    res.send(JSON.parse(JSON.stringify(remaining_tasks)));
+
+});
+
 //  ------------- list sprint stories ----------------
 router.get('/projectAllowedSprintStories/:id',ProjectHelper.isSMorPM, async function(req, res, next) {
     let sprint_id = req.query.sprint_id

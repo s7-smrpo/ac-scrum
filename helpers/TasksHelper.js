@@ -53,6 +53,14 @@ async function setAssignee(taskId,assignee) {
     await task.save();
 }
 
+async function setDone(taskId) {
+    let task = await getPlainTask(taskId);
+    task.setAttributes({
+        is_done: true,
+    });
+    await task.save();
+}
+
 
 async function listProjectTasks(projectId) {
     return await Tasks.findAll( {
@@ -213,5 +221,6 @@ module.exports = {
     listAssigneesUnacceptedTasks,
     setAccepted,
     setAssignee,
+    setDone,
     listAssigneesAcceptedTasks,
 };
