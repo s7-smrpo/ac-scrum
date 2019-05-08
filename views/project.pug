@@ -283,11 +283,15 @@ block content
                                                                                             a.nav-link(href='/tasks/' + task.id + '/edit/', style="display: inline-block; margin: 0; padding: 0;") edit
                                                                                 if count === 0
                                                                                     span  /
-
+                                                                        if(project.product_owner === uid)
+                                                                            br
+                                                                            br
+                                                                            span Rejection comment:
+                                                                            textarea.form-control(type='text' placeholder='Enter rejection comment' name='Comment' id='comment'+story.id)
                                                                     .modal-footer
                                                                         button.btn.btn-secondary(type="button" data-dismiss="modal") Close
-                                                                        //if(project.product_owner !== uid)
-                                                                            a.btn.btn-primary.nav-link.float-right(href='/tasks/create/' + project.id + '/' + story.id, style="width: 40%;") Create new task
+                                                                        if(project.product_owner === uid)
+                                                                            button.btn.btn-danger(type='button' class="reject" id=story.id).float-right Reject
 
                         if !stories.length
                             div.col-md-12
@@ -310,6 +314,21 @@ block content
         }
         showMore.onclick = toggleShownStories;
 
+        function rejectStory(elem, comment) {
+            var req_data = {
+                story_id: elem.id,
+                comment: comment
+            };
+
+            $.ajax({
+                url: '/stories/reject',
+                method: 'POST',
+                data: req_data,
+            }).done(function() {
+                location.reload()
+            });
+        }
+
         window.addEventListener('load', function () {
             $(document).ready(function ($) {
                 var currentUrl = window.location.href;
@@ -317,6 +336,10 @@ block content
                     var open = currentUrl.split("view?story");
                     $("#story" + open[1]).click();
                 }
+            });
+
+            $('button.reject').click(function () {
+                rejectStory(this, $('textarea#comment'+this.id).val());
             });
         })
 

@@ -8,6 +8,14 @@ a {
   color: #00B7FF;
 }
 
+small {
+  white-space: pre-line;
+}
+
+span {
+  white-space: pre-line;
+}
+
 .page-header {
   padding-top: 5px;
 }

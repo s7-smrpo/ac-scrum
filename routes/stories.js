@@ -195,5 +195,29 @@ router.get('/:id/delete', StoriesHelper.checkIfSMorPM, async function(req, res, 
     }
 });
 
+router.post('/reject', async function(req, res, next) {
+    let data = req.body;
+
+    console.log(data.story_id);
+    console.log(data.comment);
+
+    let story = await Stories.findOne({
+        where: {
+            id: data.story_id,
+        }
+    });
+
+    story.setAttributes({
+        description: story.description + '\nRejection: ' + data.comment,
+        is_done: false,
+        in_progress: true
+    });
+
+    await story.save();
+
+    return res.status(200).send()
+
+});
+
 
 module.exports = router;
