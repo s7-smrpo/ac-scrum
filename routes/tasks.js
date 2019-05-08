@@ -166,7 +166,7 @@ router.get('/:taskId/edit', TasksHelper.checkIfSMorMember, async function(req, r
         toEditTask: currentTask,
         timeForNewTask:available_time_for_new_task,
         project:project,
-
+        // taskStory
 
     });
 });
@@ -297,6 +297,7 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
         toEditTask: task_updated,
         timeForNewTask:available_time_for_new_task,
         project:project,
+       // taskStory
     });
 
 });
@@ -347,6 +348,7 @@ router.get('/accepted', middleware.ensureAuthenticated, async function(req, res,
         TasksHelper.timeLogsPropToJson(x.dataValues);
 
         x.canFinish = !((x.dataValues.timeLogs[x.dataValues.timeLogs.length-1] || {}).estimate);
+        x._estimate  = ((x.dataValues.timeLogs[x.dataValues.timeLogs.length-1] || {}).estimate);
     })
 
     res.render('accepted_tasks', {

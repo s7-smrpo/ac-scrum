@@ -21,7 +21,7 @@ block content
                                                 h5.card-title #{task.name}
                                                 p.card-text #{task.description}
                                                 - var time = Math.round(task.time * 6 * 2) / 2;
-                                                p.card-text Estimated time: [#{time}h]
+                                                p.card-text Estimated time: [#{task._estimate}h]
 
                                                 //button.btn.btn-success(type='button' class="accept" id=task.id) Accept
                                                 //|
