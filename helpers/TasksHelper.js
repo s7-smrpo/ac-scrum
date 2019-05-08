@@ -46,6 +46,15 @@ async function setAccepted(taskId) {
     await task.save();
 }
 
+
+async function setUnaccepted(taskId) {
+    let task = await getPlainTask(taskId);
+    task.setAttributes({
+        is_accepted: false,
+    });
+    await task.save();
+}
+
 async function setAssignee(taskId,assignee) {
     let task = await getPlainTask(taskId);
     task.setAttributes({
@@ -225,4 +234,5 @@ module.exports = {
     setAssignee,
     setDone,
     listAssigneesAcceptedTasks,
+    setUnaccepted,
 };

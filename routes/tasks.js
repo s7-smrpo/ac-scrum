@@ -276,6 +276,7 @@ router.post('/:taskId/edit/', TasksHelper.checkIfSMorMember, async function(req,
 
     await task.save();
 
+
     if(assignee === null && prev_assignee){
         await UsersHelper.reset_users_pending_task_id(prev_assignee);
     }
@@ -379,6 +380,8 @@ router.get('/acceptDeny', middleware.ensureAuthenticated, async function(req, re
         await UsersHelper.reset_users_pending_task_id(req.user.id);
     }else if(typeof deny_accepted_id !== 'undefined'){
         await TasksHelper.setAssignee(deny_accepted_id,null);
+        await TasksHelper.setUnaccepted(deny_accepted_id);
+
     }
 
     remaining_tasks = await TasksHelper.listAssigneesUnacceptedTasks(req.user.id);
