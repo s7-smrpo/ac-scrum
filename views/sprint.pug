@@ -99,7 +99,14 @@ block content
                                         - var time = Math.round(task.time * 6 * 2) / 2
                                         td #{time}
                                         td #{task.story.name}
-                                        td TODO
+                                        if task.is_done
+                                            td done
+                                        else if task.is_accepted
+                                            td in progress
+                                        else if task.assignee
+                                            td pending accept
+                                        else if !task.assignee
+                                            td unassigned
 
 
                 if stories && !success && !successUpdate && !errorMessages
@@ -127,11 +134,11 @@ block content
                                         td #{story.importance}
                                         td #{story.businessValue}
                                         td #{story.estimatedTime}
-                                        if story.in_progress
-                                            td in progress
                                         if story.is_done
                                             td done
-                                        if !story.is_done && !story.in_progress
+                                        else if story.in_progress
+                                            td in progress
+                                        else if !story.is_done && !story.in_progress
                                             td ready to start work
 
 
