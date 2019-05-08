@@ -146,6 +146,7 @@ block content
                                                             .d-flex.w-100.justify-content-between
                                                                 p.mb-2 #{story.name}
                                                             small Description: #{story.description}
+
                                                             br
                                                             //small Acceptance criteria: #{story.acceptanceCriteria}
                                                             //br
@@ -205,10 +206,26 @@ block content
                                                                                 span  /
 
 
+                                                                        - function canRejectorRealize(project, story, activeSprintId) { return project.product_owner === uid && !story.is_done && story.sprint_id !== null && (story.sprint_id < activeSprintId || activeSprintId !== null)}
+
+                                                                            if canRejectorRealize(project, story, activeSprintId)
+                                                                            br
+                                                                            br
+                                                                            span Rejection comment:
+                                                                            textarea.form-control(type='text' placeholder='Enter rejection comment' name='Comment' id='comment' + story.id)
+
+
                                                                     .modal-footer
                                                                         button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+
+                                                                        if canRejectorRealize(project, story, activeSprintId)
+                                                                            button.btn.btn-danger(type='button' class="reject" id=story.id).float-right Reject
+                                                                            button.btn.btn-success(type='button' class="mark_as_realized" id=story.id).float-right Mark as realized
+
                                                                         if(project.product_owner !== uid)
                                                                             a.btn.btn-primary.nav-link.float-right(href='/tasks/create/' + project.id + '/' + story.id, style="width: 40%;") Create new task
+
+
 
 
                                 .card.border-secondary
@@ -283,15 +300,25 @@ block content
                                                                                             a.nav-link(href='/tasks/' + task.id + '/edit/', style="display: inline-block; margin: 0; padding: 0;") edit
                                                                                 if count === 0
                                                                                     span  /
-                                                                        if(project.product_owner === uid)
+
+
+                                                                        - function canRejectorRealize(project, story, activeSprintId) { return project.product_owner === uid && !story.is_done && story.sprint_id !== null && (story.sprint_id < activeSprintId || activeSprintId !== null)}
+
+                                                                        if canRejectorRealize(project, story, activeSprintId)
                                                                             br
                                                                             br
                                                                             span Rejection comment:
-                                                                            textarea.form-control(type='text' placeholder='Enter rejection comment' name='Comment' id='comment'+story.id)
-                                                                    .modal-footer
+                                                                            textarea.form-control(type='text' placeholder='Enter rejection comment' name='Comment' id='comment' + story.id)
+
+
+                                                                        .modal-footer
                                                                         button.btn.btn-secondary(type="button" data-dismiss="modal") Close
-                                                                        if(project.product_owner === uid)
+
+                                                                        if canRejectorRealize(project, story, activeSprintId)
                                                                             button.btn.btn-danger(type='button' class="reject" id=story.id).float-right Reject
+                                                                            button.btn.btn-success(type='button' class="mark_as_realized" id=story.id).float-right Mark as realized
+
+
 
                         if !stories.length
                             div.col-md-12
@@ -329,6 +356,21 @@ block content
             });
         }
 
+        function markAsRealised(elem) {
+          var req_data = {
+            story_id: elem.id
+          };
+
+          $.ajax({
+            url: '/stories/markAsRealized',
+            method: 'POST',
+            data: req_data,
+          }).done(function () {
+            location.reload()
+          });
+        }
+
+
         window.addEventListener('load', function () {
             $(document).ready(function ($) {
                 var currentUrl = window.location.href;
@@ -340,6 +382,10 @@ block content
 
             $('button.reject').click(function () {
                 rejectStory(this, $('textarea#comment'+this.id).val());
+            });
+
+            $('button.mark_as_realized').click(function () {
+              markAsRealised(this);
             });
         })
 

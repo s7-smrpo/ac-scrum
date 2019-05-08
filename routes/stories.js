@@ -210,12 +210,38 @@ router.post('/reject', async function(req, res, next) {
     story.setAttributes({
         description: story.description + '\nRejection: ' + data.comment,
         is_done: false,
-        in_progress: true
+        in_progress: true,
+        rejected: true,
+        sprint_id: null,
     });
 
     await story.save();
 
     return res.status(200).send()
+
+});
+
+router.post('/markAsRealized', async function(req, res, next) {
+  let data = req.body;
+
+  console.log("Marking story as realized");
+  console.log(data.story_id);
+
+  let story = await Stories.findOne({
+    where: {
+      id: data.story_id,
+    }
+  });
+
+  story.setAttributes({
+    is_done: true,
+    in_progress: false,
+    is_accepted: true,
+  });
+
+  await story.save();
+
+  return res.status(200).send()
 
 });
 

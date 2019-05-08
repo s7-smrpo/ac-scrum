@@ -44,9 +44,19 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: false,
         },
+        is_accepted: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
         in_progress: {
             type: DataTypes.BOOLEAN,
             allowNull: true,
+            defaultValue: false,
+        },
+        rejected: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
             defaultValue: false,
         },
         estimatedTime:{
@@ -63,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         deletedAt: {
             type: DataTypes.DATE
-        }
+        },
     });
 
     Stories.associate = function (models) {
