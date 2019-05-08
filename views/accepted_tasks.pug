@@ -26,7 +26,8 @@ block content
                                                 //button.btn.btn-success(type='button' class="accept" id=task.id) Accept
                                                 //|
                                                 //|
-                                                button.btn.btn-success(type='button' class="done" id=task.id) Done
+                                                if task.canFinish
+                                                    button.btn.btn-success(type='button' class="done" id=task.id) Done
                                                 |
                                                 |
                                                 button.btn.btn-danger(type='button' class="deny" id=task.id) Reject

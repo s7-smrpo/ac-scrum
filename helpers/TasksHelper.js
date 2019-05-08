@@ -41,6 +41,7 @@ async function setAccepted(taskId) {
     let task = await getPlainTask(taskId);
     task.setAttributes({
         is_accepted: true,
+        autoTimer: task.autoTimer || new Date()
     });
     await task.save();
 }
@@ -49,6 +50,7 @@ async function setAssignee(taskId,assignee) {
     let task = await getPlainTask(taskId);
     task.setAttributes({
         assignee: assignee,
+        autoTimer: assignee !== null ? task.autoTimer : null
     });
     await task.save();
 }

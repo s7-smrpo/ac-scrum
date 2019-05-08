@@ -342,6 +342,12 @@ router.get('/pending', middleware.ensureAuthenticated, async function(req, res, 
 router.get('/accepted', middleware.ensureAuthenticated, async function(req, res, next) {
     var accepted_tasks = await TasksHelper.listAssigneesAcceptedTasks(req.user.dataValues.id);
 
+    accepted_tasks.forEach(x => {
+        TasksHelper.timeLogsPropToJson(x.dataValues);
+
+        x.canFinish = !((x.dataValues.timeLogs[x.dataValues.timeLogs.length-1] || {}).estimate);
+    })
+
     res.render('accepted_tasks', {
         errorMessages: 0,
         success: 0,
